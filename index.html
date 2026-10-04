@@ -127,7 +127,7 @@
     <aside class="side">
       <section class="card">
         <strong>🏆 Pit Road Records</strong>
-        <div class="muted small">Scores save on this device/browser.</div>
+        <div id="boardStatus" class="muted small">Shared online leaderboard — loading…</div>
         <ol id="board" class="board"></ol>
       </section>
 
@@ -149,7 +149,7 @@
       <section class="card small">
         <strong>Rules</strong>
         <p class="muted">Jack up the car, change all four tires, tighten every wheel in the star pattern, then drop the jack. A wrong tightening click adds <strong>+0.25 sec</strong>.</p>
-        <div class="shareNote"><strong>Friend challenge:</strong> send this HTML file, or put it on a free static host and send the link.</div>
+        <div class="shareNote"><strong>Friend challenge:</strong> everyone playing from this link shares the same top-10 leaderboard.</div>
       </section>
     </aside>
   </div>
@@ -162,19 +162,28 @@ const startBtn=$('#start'), jackBtn=$('#jack'), dropBtn=$('#drop'), backBtn=$('#
 const work=$('#work'), instruction=$('#instruction'), carState=$('#carState'), clockEl=$('#clock'), penaltyEl=$('#penalty');
 const wheelName=$('#wheelName'), wheelStep=$('#wheelStep'), workNote=$('#workNote'), tires=$$('.tire'), lugs=$$('.lug');
 const boardEl=$('#board'), result=$('#result'), rawEl=$('#raw'), finalEl=$('#final'), resultPenalty=$('#resultPenalty');
-const scoreForm=$('#scoreForm'), initials=$('#initials'), formMsg=$('#formMsg');
+const scoreForm=$('#scoreForm'), initials=$('#initials'), formMsg=$('#formMsg'), boardStatus=$('#boardStatus');
 
 let running=false,startTime=0,endTime=0,raf=null,penalty=0,jacked=false,selected=null,phase='removeLugs',removed=new Set(),tightenIndex=0,scoreSaved=false;
 const order=['1','3','5','2','4'], completed=new Set();
-let leaderboard;
-try {
-  leaderboard = JSON.parse(localStorage.getItem('pitStopLeaderboard')||'null');
-} catch(e){ leaderboard=null; }
-if(!Array.isArray(leaderboard)) leaderboard=[
+let leaderboard=[
   {name:'ACE',time:24.86},{name:'JAX',time:27.14},{name:'RCR',time:29.72},{name:'TJM',time:32.08},{name:'BUB',time:34.91}
 ];
 
-function saveBoard(){ try{localStorage.setItem('pitStopLeaderboard',JSON.stringify(leaderboard.slice(0,10)))}catch(e){} }
+async function loadBoard(){
+  try{
+    boardStatus.textContent='Shared online leaderboard — refreshing…';
+    const res=await fetch('/api/leaderboard',{cache:'no-store'});
+    if(!res.ok)throw new Error('Leaderboard unavailable');
+    const data=await res.json();
+    if(Array.isArray(data.scores))leaderboard=data.scores;
+    renderBoard();
+    boardStatus.textContent='Shared online leaderboard';
+  }catch(e){
+    renderBoard();
+    boardStatus.textContent='Online leaderboard temporarily unavailable';
+  }
+}
 function renderBoard(){
   boardEl.innerHTML='';
   leaderboard.sort((a,b)=>a.time-b.time).slice(0,10).forEach((e,i)=>{
@@ -241,13 +250,36 @@ actionBtn.addEventListener('click',()=>{
   else if(phase==='tighten'&&tightenIndex>=5)completeWheel();
 });
 initials.addEventListener('input',()=>{initials.value=initials.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3)});
-scoreForm.addEventListener('submit',e=>{
+scoreForm.addEventListener('submit',async e=>{
   e.preventDefault(); if(scoreSaved){formMsg.textContent='Score already saved. Hit RUN AGAIN for another attempt.';return}
   const name=initials.value.trim().toUpperCase(); if(!/^[A-Z]{3}$/.test(name)){formMsg.textContent='Enter exactly 3 letters.';return}
-  const fin=Number(result.dataset.final); if(!Number.isFinite(fin))return; leaderboard.push({name,time:fin});leaderboard.sort((a,b)=>a.time-b.time);if(leaderboard.length>10)leaderboard.length=10;
-  scoreSaved=true;saveBoard();renderBoard();const rank=leaderboard.findIndex(x=>x.name===name&&Math.abs(x.time-fin)<.001)+1;formMsg.textContent=rank>0?'Saved! You are #'+rank+' on this device.':'Saved!';
+  const fin=Number(result.dataset.final); if(!Number.isFinite(fin))return;
+
+  const submitBtn=scoreForm.querySelector('button[type="submit"]');
+  submitBtn.disabled=true;
+  formMsg.textContent='Saving to the shared leaderboard…';
+
+  try{
+    const res=await fetch('/api/leaderboard',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,time:fin})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||'Could not save score.');
+
+    scoreSaved=true;
+    if(Array.isArray(data.scores))leaderboard=data.scores;
+    renderBoard();
+    formMsg.textContent=data.rank?'Saved online! You are #'+data.rank+'.':'Saved online!';
+    boardStatus.textContent='Shared online leaderboard';
+  }catch(err){
+    formMsg.textContent=err.message||'Could not save score. Try again.';
+  }finally{
+    submitBtn.disabled=false;
+  }
 });
-renderBoard();updPenalty();updateTires();
+renderBoard();loadBoard();setInterval(loadBoard,15000);updPenalty();updateTires();
 })();
 </script>
 </body>
