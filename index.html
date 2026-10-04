@@ -3,283 +3,1012 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pit Stop Challenge</title>
+<meta name="theme-color" content="#090b10">
+<title>Pit Stop Challenge — Arcade Edition</title>
 <style>
   :root{
-    --bg:#101114; --panel:#181a1f; --card:#20232a; --text:#f6f7f9;
-    --muted:#aeb4bf; --border:#343944; --accent:#e33b2e; --good:#25b46b;
-    --warn:#e0a51e;
+    --bg:#090b10;
+    --panel:#131722;
+    --panel2:#1a1f2c;
+    --card:#1e2433;
+    --line:#31394d;
+    --text:#f5f7fb;
+    --muted:#aeb7ca;
+    --red:#ff4438;
+    --yellow:#ffc940;
+    --green:#35d97d;
+    --blue:#54a7ff;
+    --shadow:0 16px 40px rgba(0,0,0,.35);
+    --glow:0 0 20px rgba(255,68,56,.35);
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  html,body{margin:0;background:
+    radial-gradient(circle at top, #182033 0%, #0c1018 32%, #090b10 75%);
+    color:var(--text);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   button,input{font:inherit}
   button{cursor:pointer}
   button:disabled{opacity:.45;cursor:not-allowed}
-  .wrap{max-width:1050px;margin:auto;padding:16px}
-  .top{display:flex;gap:12px;justify-content:space-between;align-items:end;flex-wrap:wrap}
-  h1{font-size:1.45rem;margin:0}
-  .muted{color:var(--muted)}
-  .stats{display:flex;gap:8px;flex-wrap:wrap}
-  .stat,.panel,.card{border:1px solid var(--border);border-radius:14px}
-  .stat{padding:9px 12px}
-  .grid{display:grid;grid-template-columns:1.35fr .9fr;gap:16px;margin-top:16px}
-  .panel{background:var(--panel);padding:16px}
-  .card{background:var(--card);padding:14px}
-  .controls{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-  .btn{min-height:44px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:var(--card);color:var(--text);font-weight:700}
-  .btn.primary{background:var(--accent);border-color:var(--accent)}
-  .btn.good{background:var(--good);border-color:var(--good)}
-  .carbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
-  .cargrid{display:grid;grid-template-columns:88px 1fr 88px;gap:10px;align-items:center}
-  .car{grid-row:span 2;border:2px solid var(--border);border-radius:34px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px}
-  .car .emoji{font-size:52px}
-  .tire{min-height:82px;border:1px solid var(--border);border-radius:12px;background:var(--panel);color:var(--text);font-weight:800}
-  .tire.done{background:rgba(37,180,107,.15)}
-  #work{display:none;margin-top:14px}
-  .workrow{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-  .wheel{position:relative;width:200px;height:200px;border:14px solid var(--border);border-radius:50%;background:var(--panel);flex:0 0 auto}
-  .lug{position:absolute;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-weight:800}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  .headline{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+  h1{margin:0;font-size:1.6rem;letter-spacing:.02em}
+  .sub{color:var(--muted);font-size:.95rem}
+  .hud{display:flex;flex-wrap:wrap;gap:10px}
+  .tile,.panel,.card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));box-shadow:var(--shadow)}
+  .tile{padding:10px 14px;min-width:112px}
+  .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+  .value{font-size:1.4rem;font-weight:800}
+  .layout{display:grid;grid-template-columns:1.4fr .95fr;gap:16px}
+  .panel{padding:16px}
+  .hero{position:relative;overflow:hidden}
+  .hero:before{
+    content:"";
+    position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(84,167,255,.12), transparent 28%),
+      radial-gradient(circle at 80% 15%, rgba(255,201,64,.12), transparent 24%),
+      linear-gradient(180deg, rgba(255,255,255,.03), transparent 40%);
+    pointer-events:none
+  }
+  .banner{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .chief{font-weight:800;font-size:1rem}
+  .callout{color:var(--muted);font-size:.95rem}
+  .lights{display:flex;gap:10px;justify-content:center;padding:10px 0 4px}
+  .light{width:22px;height:22px;border-radius:50%;background:#3b404e;border:2px solid #565d72;box-shadow:inset 0 0 10px rgba(0,0,0,.5)}
+  .light.red.on{background:var(--red);box-shadow:0 0 18px rgba(255,68,56,.8)}
+  .light.yellow.on{background:var(--yellow);box-shadow:0 0 18px rgba(255,201,64,.75)}
+  .light.green.on{background:var(--green);box-shadow:0 0 18px rgba(53,217,125,.75)}
+  .pit-scene{
+    position:relative;
+    min-height:420px;
+    margin-top:10px;
+    border-radius:24px;
+    border:1px solid var(--line);
+    background:
+      linear-gradient(180deg, rgba(16,19,27,.96), rgba(12,15,22,.98)),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 14px, transparent 14px 28px);
+    overflow:hidden;
+  }
+  .pit-scene:before{
+    content:"";
+    position:absolute;left:0;right:0;bottom:58px;height:8px;
+    background:repeating-linear-gradient(90deg, #fff 0 18px, transparent 18px 32px);
+    opacity:.4
+  }
+  .pit-road{
+    position:absolute;left:18px;right:18px;bottom:18px;height:86px;border-radius:18px;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.16), rgba(255,255,255,.03)),
+      linear-gradient(90deg, rgba(255,255,255,.08), transparent 10% 90%, rgba(255,255,255,.08));
+    border:1px solid rgba(255,255,255,.08)
+  }
+  .box-lines{
+    position:absolute;left:8%;right:8%;top:50%;transform:translateY(-50%);height:186px;
+    border:3px dashed rgba(255,255,255,.14);border-radius:26px
+  }
+  .crew-tag{
+    position:absolute;top:16px;right:16px;background:rgba(255,68,56,.12);color:#ffd7d3;
+    border:1px solid rgba(255,68,56,.25);padding:8px 12px;border-radius:999px;font-weight:700;font-size:.85rem
+  }
+  .car-wrap{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(72vw, 560px);height:260px;transition:transform .55s ease;
+  }
+  .car-wrap.release{transform:translate(120%,-50%)}
+  .car-body{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:68%;height:126px;border-radius:70px 90px 60px 60px/48px 58px 55px 55px;
+    background:linear-gradient(180deg, #f74339, #c61d12 65%, #94140b);
+    border:2px solid rgba(255,255,255,.22);
+    box-shadow:0 18px 45px rgba(0,0,0,.35), 0 0 36px rgba(255,68,56,.18);
+  }
+  .car-body:before{
+    content:"";position:absolute;left:20%;right:20%;top:12px;height:38px;border-radius:999px;
+    background:linear-gradient(180deg, #495467, #232938);
+    border:1px solid rgba(255,255,255,.22)
+  }
+  .car-body:after{
+    content:"";position:absolute;left:8%;right:8%;bottom:14px;height:14px;border-radius:999px;
+    background:rgba(255,255,255,.12)
+  }
+  .spoiler{
+    position:absolute;right:13%;top:28%;width:90px;height:10px;background:#111826;border-radius:6px;border:1px solid rgba(255,255,255,.15)
+  }
+  .spoiler:before,.spoiler:after{
+    content:"";position:absolute;top:8px;width:8px;height:24px;background:#111826
+  }
+  .spoiler:before{left:12px}.spoiler:after{right:12px}
+  .hood-number{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-3deg);
+    font-size:2.4rem;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.45)
+  }
+  .wheel-node{
+    position:absolute;width:102px;height:102px;border-radius:50%;
+    border:3px solid rgba(255,255,255,.16);
+    background:radial-gradient(circle at 50% 45%, #4a5266 0 12%, #161b26 13% 22%, #06080c 24% 64%, #141924 66% 100%);
+    color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;
+    box-shadow:0 12px 28px rgba(0,0,0,.35);
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+  }
+  .wheel-node small{font-size:.78rem;color:#d6deef}
+  .wheel-node .state{font-size:.7rem;color:#aeb7ca}
+  .wheel-node.active{transform:scale(1.07);border-color:var(--yellow);box-shadow:0 0 0 4px rgba(255,201,64,.14), 0 0 28px rgba(255,201,64,.18)}
+  .wheel-node.done{border-color:var(--green);box-shadow:0 0 0 4px rgba(53,217,125,.14), 0 0 28px rgba(53,217,125,.2)}
+  .wheel-node.locked{opacity:.6}
+  .wheel-node.lf{left:9%;top:18%}
+  .wheel-node.rf{right:9%;top:18%}
+  .wheel-node.lr{left:9%;bottom:18%}
+  .wheel-node.rr{right:9%;bottom:18%}
+  .wheel-node .badge{
+    margin-top:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.08);
+    font-size:.62rem;letter-spacing:.08em;text-transform:uppercase
+  }
+  .work-grid{display:grid;grid-template-columns:1fr 290px;gap:14px;margin-top:16px}
+  .card{padding:14px}
+  .service-title{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+  .service-sub{color:var(--muted);font-size:.95rem}
+  .wheel-stage{
+    display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:12px
+  }
+  .service-wheel{
+    position:relative;width:220px;height:220px;border-radius:50%;
+    border:15px solid #353c4b;background:radial-gradient(circle at 50% 46%, #525e76 0 11%, #161b26 12% 24%, #090b10 25% 63%, #181e2a 64% 100%);
+    box-shadow:inset 0 0 26px rgba(0,0,0,.4), 0 14px 32px rgba(0,0,0,.3)
+  }
+  .lug{
+    position:absolute;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);
+    background:linear-gradient(180deg, #2d3444, #1a1f29);color:#fff;font-weight:900
+  }
+  .lug:disabled{opacity:.35}
+  .lug.hot{outline:3px solid rgba(255,201,64,.22);box-shadow:0 0 24px rgba(255,201,64,.18)}
   .lug:nth-of-type(1){left:50%;top:4px;transform:translateX(-50%)}
-  .lug:nth-of-type(2){right:5px;top:58px}
-  .lug:nth-of-type(3){right:28px;bottom:4px}
-  .lug:nth-of-type(4){left:28px;bottom:4px}
-  .lug:nth-of-type(5){left:5px;top:58px}
-  .hub{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-size:32px}
-  .side{display:grid;gap:14px}
-  .board{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-  .board li{display:grid;grid-template-columns:32px 1fr auto;gap:8px;border:1px solid var(--border);border-radius:10px;padding:9px 10px}
-  .result{display:none}
-  .row{display:grid;grid-template-columns:1fr auto;gap:8px;margin:6px 0}
-  form .inrow{display:flex;gap:8px;margin-top:8px}
-  input{min-width:0;flex:1;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);padding:10px;text-transform:uppercase;text-align:center;font-size:20px;letter-spacing:.28em}
-  .small{font-size:.9rem}
-  .shareNote{margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:10px}
-  @media(max-width:760px){.grid{grid-template-columns:1fr}.cargrid{grid-template-columns:74px 1fr 74px}.workrow{justify-content:center}.wheel{width:190px;height:190px}}
+  .lug:nth-of-type(2){right:8px;top:62px}
+  .lug:nth-of-type(3){right:34px;bottom:8px}
+  .lug:nth-of-type(4){left:34px;bottom:8px}
+  .lug:nth-of-type(5){left:8px;top:62px}
+  .hub{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-size:38px;color:#cad4e8}
+  .service-actions{flex:1;min-width:220px}
+  .star{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:1.1rem;font-weight:800}
+  .action-main,.action-alt,.start-btn,.modal-btn{
+    min-height:48px;border-radius:14px;border:1px solid var(--line);padding:12px 16px;font-weight:800
+  }
+  .action-main,.start-btn,.modal-btn.primary{
+    background:linear-gradient(180deg, #ff5c51, #d8281f);color:#fff;border-color:#ff7167;box-shadow:var(--glow)
+  }
+  .action-alt{background:linear-gradient(180deg, #242b3a, #171c27);color:#fff}
+  .action-main.full{width:100%}
+  .tinyrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .hint{margin-top:10px;color:var(--muted);font-size:.93rem;line-height:1.45}
+  .sidebar{display:grid;gap:14px}
+  .board{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .board li{display:grid;grid-template-columns:34px 1fr auto;gap:8px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.025)}
+  .board li.top1{border-color:rgba(255,201,64,.35);box-shadow:0 0 0 3px rgba(255,201,64,.09)}
+  .pill{display:inline-block;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06);font-size:.75rem;color:#d8e0f2}
+  .status-online{color:#a6f2c7}
+  .notice{font-size:.92rem;color:var(--muted);line-height:1.45}
+  .controls-list{display:grid;gap:8px;margin-top:10px}
+  .controls-list div{display:flex;justify-content:space-between;gap:10px;color:#dce4f4;font-size:.95rem}
+  .overlay{
+    position:fixed;inset:0;background:rgba(5,7,11,.74);display:none;align-items:center;justify-content:center;padding:18px;z-index:25
+  }
+  .overlay.show{display:flex}
+  .modal{
+    width:min(100%, 540px);padding:22px;border-radius:24px;border:1px solid var(--line);
+    background:linear-gradient(180deg, #141925, #0e121b);box-shadow:0 20px 48px rgba(0,0,0,.42)
+  }
+  .modal h2{margin:.1rem 0 .35rem;font-size:1.7rem}
+  .modal p{color:var(--muted)}
+  .result-grid{display:grid;grid-template-columns:1fr auto;gap:10px;margin:16px 0;font-size:1rem}
+  .result-grid strong{font-size:1.1rem}
+  .rating{margin:16px 0 10px;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+  .rating b{font-size:1.15rem}
+  .flash-record{
+    display:none;margin-top:12px;padding:12px 14px;border-radius:14px;
+    background:linear-gradient(90deg, rgba(255,201,64,.18), rgba(255,68,56,.1));
+    border:1px solid rgba(255,201,64,.35);color:#ffeab5;font-weight:900;text-transform:uppercase;letter-spacing:.08em
+  }
+  .flash-record.show{display:block;animation:blink 1s infinite alternate}
+  @keyframes blink{from{transform:scale(1)}to{transform:scale(1.02)}}
+  .countdown{
+    position:absolute;inset:0;background:rgba(8,10,15,.64);display:none;align-items:center;justify-content:center;z-index:3
+  }
+  .countdown.show{display:flex}
+  .countdown-num{
+    width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 30%, #2a3346, #111521 70%);
+    border:3px solid rgba(255,255,255,.15);font-size:4rem;font-weight:900;box-shadow:0 0 36px rgba(255,255,255,.08)
+  }
+  .penalty-flash{animation:penflash .22s ease}
+  @keyframes penflash{0%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}100%{transform:translateX(0)}}
+  .go-banner{
+    position:absolute;left:50%;top:16px;transform:translateX(-50%);
+    background:linear-gradient(180deg, #43df88, #19a85f);color:#07110a;
+    padding:10px 18px;border-radius:999px;font-weight:900;letter-spacing:.12em;display:none;z-index:4
+  }
+  .go-banner.show{display:block;animation:pop .55s ease}
+  @keyframes pop{0%{transform:translateX(-50%) scale(.6);opacity:0}100%{transform:translateX(-50%) scale(1);opacity:1}}
+  .footer-note{margin-top:10px;color:var(--muted);font-size:.85rem}
+  input.initials{
+    width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#1b2030;color:#fff;
+    text-align:center;text-transform:uppercase;letter-spacing:.32em;font-size:1.3rem;font-weight:900
+  }
+  .modal-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr}
+    .work-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    .wrap{padding:12px}
+    .wheel-node{width:88px;height:88px}
+    .wheel-node small{font-size:.72rem}
+    .car-wrap{height:240px;width:96%}
+    .service-wheel{width:200px;height:200px}
+    .countdown-num{width:150px;height:150px;font-size:3.3rem}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
+  <div class="headline">
     <div>
-      <h1>🏁 Pit Stop Challenge</h1>
-      <div class="muted small">Four tires. Five lugs each. Fastest final time wins.</div>
+      <h1>🏁 Pit Stop Challenge — Arcade Edition</h1>
+      <div class="sub">Full arcade overhaul: countdown lights, animated pit lane, sounds, flashy results, and a shared online leaderboard.</div>
     </div>
-    <div class="stats">
-      <div class="stat">Clock <strong id="clock">0.00</strong>s</div>
-      <div class="stat">Penalty <strong id="penalty">0.00</strong>s</div>
+    <div class="hud">
+      <div class="tile"><div class="label">Clock</div><div id="clock" class="value">0.00s</div></div>
+      <div class="tile"><div class="label">Penalty</div><div id="penalty" class="value">0.00s</div></div>
+      <div class="tile"><div class="label">Wheels</div><div id="progress" class="value">0/4</div></div>
+      <div class="tile"><div class="label">Status</div><div id="statusShort" class="value" style="font-size:1rem;margin-top:4px">READY</div></div>
     </div>
   </div>
 
-  <div class="grid">
-    <section class="panel">
-      <div class="controls">
+  <div class="layout">
+    <section class="panel hero">
+      <div class="banner">
         <div>
-          <strong>Pit Box</strong>
-          <div id="instruction" class="muted small">Hit GREEN FLAG to start.</div>
+          <div class="chief">Crew Chief</div>
+          <div id="callout" class="callout">Ready to roll. Hit START RACE, watch the lights, and rip through the stop.</div>
         </div>
-        <button id="start" class="btn primary">GREEN FLAG</button>
-      </div>
-
-      <div class="carbox">
-        <div class="cargrid">
-          <button class="tire" data-pos="LF" disabled>LF<br><span class="muted small">Waiting</span></button>
-          <div class="car">
-            <div class="emoji">🏎️</div>
-            <strong>Stock Car</strong>
-            <div id="carState" class="muted small">On the ground</div>
-            <button id="jack" class="btn" disabled style="margin-top:12px">Jack Up Car</button>
-            <button id="drop" class="btn good" disabled style="margin-top:8px">Drop Jack & GO!</button>
-          </div>
-          <button class="tire" data-pos="RF" disabled>RF<br><span class="muted small">Waiting</span></button>
-          <button class="tire" data-pos="LR" disabled>LR<br><span class="muted small">Waiting</span></button>
-          <button class="tire" data-pos="RR" disabled>RR<br><span class="muted small">Waiting</span></button>
+        <div class="tinyrow">
+          <button id="startBtn" class="start-btn">START RACE</button>
+          <button id="soundBtn" class="action-alt">🔊 SOUND ON</button>
         </div>
       </div>
 
-      <div id="work" class="card">
-        <div class="controls">
-          <div>
-            <strong><span id="wheelName">LF</span> Wheel Service</strong>
-            <div id="wheelStep" class="muted small">Remove the five lug nuts.</div>
+      <div class="lights" id="lightsRow">
+        <div class="light red"></div>
+        <div class="light red"></div>
+        <div class="light yellow"></div>
+        <div class="light yellow"></div>
+        <div class="light green"></div>
+      </div>
+
+      <div class="pit-scene">
+        <div class="go-banner" id="goBanner">GO GO GO!</div>
+        <div class="countdown" id="countdownOverlay"><div id="countdownNum" class="countdown-num">3</div></div>
+        <div class="crew-tag" id="sceneTag">PIT BOX READY</div>
+        <div class="box-lines"></div>
+        <div class="car-wrap" id="carWrap">
+          <div class="car-body"></div>
+          <div class="spoiler"></div>
+          <div class="hood-number">07</div>
+
+          <button class="wheel-node lf locked" data-pos="LF">
+            <small>LF</small><div class="state">WAITING</div><div class="badge">WHEEL</div>
+          </button>
+          <button class="wheel-node rf locked" data-pos="RF">
+            <small>RF</small><div class="state">WAITING</div><div class="badge">WHEEL</div>
+          </button>
+          <button class="wheel-node lr locked" data-pos="LR">
+            <small>LR</small><div class="state">WAITING</div><div class="badge">WHEEL</div>
+          </button>
+          <button class="wheel-node rr locked" data-pos="RR">
+            <small>RR</small><div class="state">WAITING</div><div class="badge">WHEEL</div>
+          </button>
+        </div>
+        <div class="pit-road"></div>
+      </div>
+
+      <div class="work-grid">
+        <div class="card">
+          <div class="service-title">
+            <div>
+              <strong id="serviceTitle">Pit Sequence</strong>
+              <div id="serviceSub" class="service-sub">Start the run, wait for green, jack the car, and select a wheel.</div>
+            </div>
+            <span id="phasePill" class="pill">READY</span>
           </div>
-          <button id="back" class="btn">Back to car</button>
+
+          <div class="wheel-stage">
+            <div class="service-wheel">
+              <button class="lug" data-lug="1">1</button>
+              <button class="lug" data-lug="2">2</button>
+              <button class="lug" data-lug="3">3</button>
+              <button class="lug" data-lug="4">4</button>
+              <button class="lug" data-lug="5">5</button>
+              <div class="hub">●</div>
+            </div>
+
+            <div class="service-actions">
+              <div class="label">Tightening pattern</div>
+              <div class="star">1 → 3 → 5 → 2 → 4</div>
+              <div id="serviceHint" class="hint">The highlighted lug is the correct next click during tightening. Wrong clicks add +0.25 sec.</div>
+
+              <div class="tinyrow">
+                <button id="jackBtn" class="action-main">JACK UP CAR</button>
+                <button id="releaseBtn" class="action-main" disabled>DROP JACK & GO!</button>
+                <button id="backBtn" class="action-alt">BACK</button>
+              </div>
+
+              <div class="tinyrow" style="margin-top:14px">
+                <button id="phaseBtn" class="action-main full" disabled>SELECT A WHEEL TO BEGIN</button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="workrow">
-          <div class="wheel">
-            <button class="lug" data-lug="1">1</button>
-            <button class="lug" data-lug="2">2</button>
-            <button class="lug" data-lug="3">3</button>
-            <button class="lug" data-lug="4">4</button>
-            <button class="lug" data-lug="5">5</button>
-            <div class="hub">●</div>
+        <div class="card">
+          <strong>Arcade Controls</strong>
+          <div class="controls-list">
+            <div><span>1.</span><span>Start race + wait for green</span></div>
+            <div><span>2.</span><span>Jack the car</span></div>
+            <div><span>3.</span><span>Select any wheel</span></div>
+            <div><span>4.</span><span>Zap all 5 lugs off</span></div>
+            <div><span>5.</span><span>Pull old tire / mount new tire</span></div>
+            <div><span>6.</span><span>Retighten in star pattern</span></div>
+            <div><span>7.</span><span>Repeat for all 4 wheels</span></div>
+            <div><span>8.</span><span>Drop jack and launch</span></div>
           </div>
-          <div style="flex:1;min-width:220px">
-            <div class="muted small">Tightening order</div>
-            <div style="font-family:ui-monospace,monospace;font-size:20px;margin-top:4px">1 → 3 → 5 → 2 → 4</div>
-            <p id="workNote" class="small">Tap all five lugs to remove them.</p>
-            <button id="action" class="btn primary" disabled style="width:100%">Remove Tire</button>
-          </div>
+          <div class="footer-note">Pro tip: clean stops with no lug mistakes are the fastest way to top the board.</div>
         </div>
       </div>
     </section>
 
-    <aside class="side">
+    <aside class="sidebar">
       <section class="card">
-        <strong>🏆 Pit Road Records</strong>
-        <div id="boardStatus" class="muted small">Shared online leaderboard — loading…</div>
-        <ol id="board" class="board"></ol>
+        <strong>🏆 Shared Pit Road Records</strong>
+        <div id="boardStatus" class="notice status-online">Loading shared online leaderboard…</div>
+        <ol id="leaderboard" class="board"></ol>
       </section>
 
-      <section id="result" class="panel result">
-        <strong style="font-size:20px">Run Complete</strong>
-        <div class="row"><span>Raw time</span><strong id="raw">0.00s</strong></div>
-        <div class="row"><span>Penalties</span><strong id="resultPenalty">0.00s</strong></div>
-        <div class="row"><strong>FINAL</strong><strong id="final" style="font-size:20px">0.00s</strong></div>
-        <form id="scoreForm">
-          <label for="initials" class="small">Enter 3 initials</label>
-          <div class="inrow">
-            <input id="initials" maxlength="3" value="AAA" autocomplete="off">
-            <button class="btn primary" type="submit">SAVE</button>
-          </div>
-          <div id="formMsg" class="muted small" style="margin-top:8px"></div>
-        </form>
-      </section>
-
-      <section class="card small">
-        <strong>Rules</strong>
-        <p class="muted">Jack up the car, change all four tires, tighten every wheel in the star pattern, then drop the jack. A wrong tightening click adds <strong>+0.25 sec</strong>.</p>
-        <div class="shareNote"><strong>Friend challenge:</strong> everyone playing from this link shares the same top-10 leaderboard.</div>
+      <section class="card">
+        <strong>Race Notes</strong>
+        <div class="notice">
+          Everyone using the live link shares the same Top 10 leaderboard.
+          Your initials save online after each completed run.
+        </div>
       </section>
     </aside>
   </div>
 </div>
 
+<div id="resultOverlay" class="overlay">
+  <div class="modal">
+    <div class="label">Run Complete</div>
+    <h2 id="resultTitle">Fast Stop!</h2>
+    <p id="resultBlurb">That felt clean. Lock in your initials and send it to the board.</p>
+
+    <div class="result-grid">
+      <span>Raw time</span><strong id="rawTime">0.00s</strong>
+      <span>Penalties</span><strong id="penaltyTime">0.00s</strong>
+      <span>Final time</span><strong id="finalTime">0.00s</strong>
+    </div>
+
+    <div class="rating">
+      <div class="label">Crew Rating</div>
+      <b id="ratingText">Fast Stop</b>
+      <div id="ratingDesc" class="notice">Solid work in the box.</div>
+    </div>
+
+    <div id="recordFlash" class="flash-record">NEW RECORD!</div>
+
+    <div class="modal-row">
+      <input id="initialsInput" class="initials" maxlength="3" value="AAA" aria-label="Three initials">
+    </div>
+    <div id="saveMsg" class="notice" style="margin-top:10px">Enter 3 initials and save your score.</div>
+    <div class="modal-row">
+      <button id="saveScoreBtn" class="modal-btn primary">SAVE SCORE</button>
+      <button id="playAgainBtn" class="modal-btn">PLAY AGAIN</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (() => {
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const startBtn=$('#start'), jackBtn=$('#jack'), dropBtn=$('#drop'), backBtn=$('#back'), actionBtn=$('#action');
-const work=$('#work'), instruction=$('#instruction'), carState=$('#carState'), clockEl=$('#clock'), penaltyEl=$('#penalty');
-const wheelName=$('#wheelName'), wheelStep=$('#wheelStep'), workNote=$('#workNote'), tires=$$('.tire'), lugs=$$('.lug');
-const boardEl=$('#board'), result=$('#result'), rawEl=$('#raw'), finalEl=$('#final'), resultPenalty=$('#resultPenalty');
-const scoreForm=$('#scoreForm'), initials=$('#initials'), formMsg=$('#formMsg'), boardStatus=$('#boardStatus');
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
 
-let running=false,startTime=0,endTime=0,raf=null,penalty=0,jacked=false,selected=null,phase='removeLugs',removed=new Set(),tightenIndex=0,scoreSaved=false;
-const order=['1','3','5','2','4'], completed=new Set();
-let leaderboard=[
-  {name:'ACE',time:24.86},{name:'JAX',time:27.14},{name:'RCR',time:29.72},{name:'TJM',time:32.08},{name:'BUB',time:34.91}
-];
+  const lights = $$('#lightsRow .light');
+  const wheelButtons = $$('.wheel-node');
+  const lugButtons = $$('.lug');
 
-async function loadBoard(){
-  try{
-    boardStatus.textContent='Shared online leaderboard — refreshing…';
-    const res=await fetch('/api/leaderboard',{cache:'no-store'});
-    if(!res.ok)throw new Error('Leaderboard unavailable');
-    const data=await res.json();
-    if(Array.isArray(data.scores))leaderboard=data.scores;
-    renderBoard();
-    boardStatus.textContent='Shared online leaderboard';
-  }catch(e){
-    renderBoard();
-    boardStatus.textContent='Online leaderboard temporarily unavailable';
-  }
-}
-function renderBoard(){
-  boardEl.innerHTML='';
-  leaderboard.sort((a,b)=>a.time-b.time).slice(0,10).forEach((e,i)=>{
-    const li=document.createElement('li');
-    li.innerHTML='<span>'+String(i+1).padStart(2,'0')+'</span><strong></strong><span></span>';
-    li.children[1].textContent=e.name; li.children[2].textContent=e.time.toFixed(2)+'s'; boardEl.appendChild(li);
-  });
-}
-function elapsed(){if(!startTime)return 0;const end=running?performance.now():endTime;return Math.max(0,(end-startTime)/1000)}
-function tick(){if(!running)return;clockEl.textContent=elapsed().toFixed(2);raf=requestAnimationFrame(tick)}
-function updPenalty(){penaltyEl.textContent=penalty.toFixed(2)}
-function updateTires(){
-  tires.forEach(btn=>{
-    const pos=btn.dataset.pos, label=btn.querySelector('span');
-    if(completed.has(pos)){label.textContent='DONE ✓';btn.disabled=true;btn.classList.add('done')}
-    else{label.textContent=jacked?'Change tire':'Waiting';btn.disabled=!running||!jacked;btn.classList.remove('done')}
-  });
-  dropBtn.disabled=!(running&&completed.size===4);
-}
-function resetLugs(){lugs.forEach(b=>{b.disabled=false;b.style.opacity='1';b.style.background=''})}
-function openWheel(pos){
-  selected=pos;phase='removeLugs';removed=new Set();tightenIndex=0;wheelName.textContent=pos;wheelStep.textContent='Remove the five lug nuts.';
-  workNote.textContent='Tap all five lugs to remove them.';actionBtn.textContent='Remove Tire';actionBtn.disabled=true;resetLugs();work.style.display='block';
-}
-function markRemoved(btn){const id=btn.dataset.lug;if(removed.has(id))return;removed.add(id);btn.disabled=true;btn.style.opacity='.3';if(removed.size===5){actionBtn.disabled=false;workNote.textContent='All lugs are off. Pull the old tire.'}}
-function highlightNext(){
-  lugs.forEach(b=>{b.style.background='';b.disabled=false});
-  if(tightenIndex>=order.length){lugs.forEach(b=>b.disabled=true);actionBtn.disabled=false;workNote.textContent='Wheel secured. Hit Wheel Complete.';return}
-  const t=lugs.find(b=>b.dataset.lug===order[tightenIndex]); if(t)t.style.background='rgba(227,59,46,.22)';
-}
-function prepTightening(){phase='tighten';tightenIndex=0;wheelStep.textContent='Tighten the five lug nuts.';workNote.textContent='Follow the star pattern: 1 → 3 → 5 → 2 → 4.';actionBtn.disabled=true;actionBtn.textContent='Wheel Complete';resetLugs();highlightNext()}
-function completeWheel(){
-  completed.add(selected);instruction.textContent=selected+' tire complete. Pick the next wheel.';work.style.display='none';selected=null;updateTires();
-  if(completed.size===4)instruction.textContent='All four tires are on. DROP THE JACK!';
-}
-function startRun(){
-  if(raf)cancelAnimationFrame(raf);running=true;startTime=performance.now();endTime=0;penalty=0;jacked=false;selected=null;completed.clear();scoreSaved=false;
-  result.style.display='none';work.style.display='none';startBtn.disabled=true;jackBtn.disabled=false;dropBtn.disabled=true;carState.textContent='On the ground';
-  instruction.textContent='Clock is running — jack up the car!';updPenalty();updateTires();tick();
-}
-function finishRun(){
-  if(!running||completed.size!==4)return;endTime=performance.now();running=false;if(raf)cancelAnimationFrame(raf);clockEl.textContent=elapsed().toFixed(2);
-  startBtn.disabled=false;startBtn.textContent='RUN AGAIN';jackBtn.disabled=true;dropBtn.disabled=true;tires.forEach(b=>b.disabled=true);work.style.display='none';carState.textContent='Released!';
-  instruction.textContent='STOP THE CLOCK — enter your initials.';const raw=elapsed(), fin=raw+penalty;rawEl.textContent=raw.toFixed(2)+'s';resultPenalty.textContent=penalty.toFixed(2)+'s';
-  finalEl.textContent=fin.toFixed(2)+'s';result.dataset.final=fin.toFixed(3);result.style.display='block';initials.focus();
-}
-startBtn.addEventListener('click',startRun);
-jackBtn.addEventListener('click',()=>{if(!running||jacked)return;jacked=true;jackBtn.disabled=true;carState.textContent='Jacked up';instruction.textContent='Pick a tire and get to work.';updateTires()});
-dropBtn.addEventListener('click',finishRun);
-backBtn.addEventListener('click',()=>work.style.display='none');
-tires.forEach(btn=>btn.addEventListener('click',()=>{if(running&&jacked&&!completed.has(btn.dataset.pos))openWheel(btn.dataset.pos)}));
-lugs.forEach(btn=>btn.addEventListener('click',()=>{
-  if(!running||!selected)return;
-  if(phase==='removeLugs') markRemoved(btn);
-  else if(phase==='tighten'){
-    const id=btn.dataset.lug, correct=order[tightenIndex];
-    if(id===correct){btn.disabled=true;btn.style.opacity='.3';tightenIndex++;highlightNext()}
-    else{penalty+=.25;updPenalty();workNote.textContent='Wrong lug! +0.25 sec. Next: '+correct}
-  }
-}));
-actionBtn.addEventListener('click',()=>{
-  if(phase==='removeLugs'&&removed.size===5){phase='mount';wheelStep.textContent='Old tire removed.';workNote.textContent='Grab the fresh tire and mount it.';actionBtn.textContent='Mount Fresh Tire'}
-  else if(phase==='mount')prepTightening();
-  else if(phase==='tighten'&&tightenIndex>=5)completeWheel();
-});
-initials.addEventListener('input',()=>{initials.value=initials.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3)});
-scoreForm.addEventListener('submit',async e=>{
-  e.preventDefault(); if(scoreSaved){formMsg.textContent='Score already saved. Hit RUN AGAIN for another attempt.';return}
-  const name=initials.value.trim().toUpperCase(); if(!/^[A-Z]{3}$/.test(name)){formMsg.textContent='Enter exactly 3 letters.';return}
-  const fin=Number(result.dataset.final); if(!Number.isFinite(fin))return;
+  const clockEl = $('#clock');
+  const penaltyEl = $('#penalty');
+  const progressEl = $('#progress');
+  const statusShort = $('#statusShort');
+  const callout = $('#callout');
+  const serviceTitle = $('#serviceTitle');
+  const serviceSub = $('#serviceSub');
+  const serviceHint = $('#serviceHint');
+  const phasePill = $('#phasePill');
+  const phaseBtn = $('#phaseBtn');
+  const jackBtn = $('#jackBtn');
+  const releaseBtn = $('#releaseBtn');
+  const backBtn = $('#backBtn');
+  const startBtn = $('#startBtn');
+  const soundBtn = $('#soundBtn');
+  const boardStatus = $('#boardStatus');
+  const leaderboardEl = $('#leaderboard');
+  const resultOverlay = $('#resultOverlay');
+  const resultTitle = $('#resultTitle');
+  const resultBlurb = $('#resultBlurb');
+  const rawTime = $('#rawTime');
+  const penaltyTime = $('#penaltyTime');
+  const finalTime = $('#finalTime');
+  const ratingText = $('#ratingText');
+  const ratingDesc = $('#ratingDesc');
+  const saveMsg = $('#saveMsg');
+  const saveScoreBtn = $('#saveScoreBtn');
+  const playAgainBtn = $('#playAgainBtn');
+  const initialsInput = $('#initialsInput');
+  const recordFlash = $('#recordFlash');
+  const countdownOverlay = $('#countdownOverlay');
+  const countdownNum = $('#countdownNum');
+  const goBanner = $('#goBanner');
+  const sceneTag = $('#sceneTag');
+  const carWrap = $('#carWrap');
 
-  const submitBtn=scoreForm.querySelector('button[type="submit"]');
-  submitBtn.disabled=true;
-  formMsg.textContent='Saving to the shared leaderboard…';
+  let audioCtx = null;
+  let soundOn = true;
 
-  try{
-    const res=await fetch('/api/leaderboard',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name,time:fin})
+  let leaderboard = [
+    {name:'ACE', time:24.86},
+    {name:'JAX', time:27.14},
+    {name:'RCR', time:29.72},
+    {name:'TJM', time:32.08},
+    {name:'BUB', time:34.91}
+  ];
+
+  const wheelMap = {
+    LF:{label:'Left Front'}, RF:{label:'Right Front'},
+    LR:{label:'Left Rear'}, RR:{label:'Right Rear'}
+  };
+
+  let running = false;
+  let countdownRunning = false;
+  let startTime = 0;
+  let endTime = 0;
+  let animationId = null;
+  let penalty = 0;
+  let jacked = false;
+  let selectedWheel = null;
+  let scoreSaved = false;
+  let lastFinalTime = 0;
+
+  const order = ['1','3','5','2','4'];
+  const wheels = {};
+
+  function seedWheelState(){
+    ['LF','RF','LR','RR'].forEach(pos => {
+      wheels[pos] = {
+        phase:'idle',      // idle remove mounted tighten complete
+        removed:new Set(),
+        tightenIndex:0,
+        mistakes:0,
+        complete:false
+      };
     });
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(data.error||'Could not save score.');
-
-    scoreSaved=true;
-    if(Array.isArray(data.scores))leaderboard=data.scores;
-    renderBoard();
-    formMsg.textContent=data.rank?'Saved online! You are #'+data.rank+'.':'Saved online!';
-    boardStatus.textContent='Shared online leaderboard';
-  }catch(err){
-    formMsg.textContent=err.message||'Could not save score. Try again.';
-  }finally{
-    submitBtn.disabled=false;
   }
-});
-renderBoard();loadBoard();setInterval(loadBoard,15000);updPenalty();updateTires();
+  seedWheelState();
+
+  function ensureAudio(){
+    if (!soundOn) return null;
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function beep(freq=440, duration=.08, type='square', gain=.04){
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const amp = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    amp.gain.value = gain;
+    osc.connect(amp);
+    amp.connect(ctx.destination);
+    const now = ctx.currentTime;
+    amp.gain.setValueAtTime(gain, now);
+    amp.gain.exponentialRampToValueAtTime(.0001, now + duration);
+    osc.start(now);
+    osc.stop(now + duration);
+  }
+
+  function impactSound(){
+    beep(180, .06, 'square', .05);
+    setTimeout(() => beep(120, .08, 'sawtooth', .03), 35);
+  }
+
+  function successSound(){
+    beep(660,.08,'square',.05);
+    setTimeout(()=>beep(880,.1,'square',.04),70);
+  }
+
+  function badSound(){
+    beep(170,.12,'sawtooth',.06);
+  }
+
+  function startTone(){
+    beep(450,.08,'square',.05);
+    setTimeout(()=>beep(540,.08,'square',.05),90);
+    setTimeout(()=>beep(660,.12,'square',.05),180);
+  }
+
+  function winFanfare(){
+    beep(660,.12,'square',.05);
+    setTimeout(()=>beep(880,.12,'square',.05),120);
+    setTimeout(()=>beep(990,.18,'triangle',.05),240);
+  }
+
+  function updateHUD(){
+    penaltyEl.textContent = penalty.toFixed(2) + 's';
+    const completeCount = Object.values(wheels).filter(w => w.complete).length;
+    progressEl.textContent = completeCount + '/4';
+    releaseBtn.disabled = !(running && completeCount === 4);
+    if (running) {
+      statusShort.textContent = completeCount === 4 ? 'RELEASE' : (selectedWheel ? selectedWheel : (jacked ? 'SERVICE' : 'JACK'));
+    } else {
+      statusShort.textContent = countdownRunning ? 'COUNTDOWN' : 'READY';
+    }
+  }
+
+  function elapsed(){
+    if (!startTime) return 0;
+    const end = running ? performance.now() : endTime;
+    return Math.max(0, (end - startTime) / 1000);
+  }
+
+  function tick(){
+    if (!running) return;
+    clockEl.textContent = elapsed().toFixed(2) + 's';
+    animationId = requestAnimationFrame(tick);
+  }
+
+  function clearLights(){
+    lights.forEach(l => l.classList.remove('on'));
+  }
+
+  function renderBoard(){
+    leaderboardEl.innerHTML = '';
+    leaderboard.slice(0,10).forEach((entry, index) => {
+      const li = document.createElement('li');
+      if (index === 0) li.classList.add('top1');
+      li.innerHTML = `<span>${String(index + 1).padStart(2,'0')}</span><strong>${entry.name}</strong><span>${Number(entry.time).toFixed(2)}s</span>`;
+      leaderboardEl.appendChild(li);
+    });
+  }
+
+  async function loadBoard(){
+    try{
+      boardStatus.textContent = 'Refreshing shared online leaderboard…';
+      boardStatus.classList.add('status-online');
+      const res = await fetch('/api/leaderboard', {cache:'no-store'});
+      if (!res.ok) throw new Error('board unavailable');
+      const data = await res.json();
+      if (Array.isArray(data.scores)) leaderboard = data.scores;
+      renderBoard();
+      boardStatus.textContent = 'Shared online leaderboard is live';
+    }catch(err){
+      renderBoard();
+      boardStatus.textContent = 'Leaderboard temporarily unavailable';
+      boardStatus.classList.remove('status-online');
+    }
+  }
+
+  function resetWheelsUI(){
+    wheelButtons.forEach(btn => {
+      const pos = btn.dataset.pos;
+      const state = btn.querySelector('.state');
+      btn.classList.remove('active','done','locked');
+      if (!running || !jacked) btn.classList.add('locked');
+      const wheel = wheels[pos];
+      if (wheel.complete){
+        btn.classList.add('done');
+        state.textContent = 'DONE';
+        btn.disabled = true;
+      } else if (!jacked){
+        state.textContent = 'WAITING';
+        btn.disabled = true;
+      } else {
+        state.textContent = selectedWheel === pos ? 'ACTIVE' : 'READY';
+        btn.disabled = !running;
+      }
+    });
+  }
+
+  function selectWheel(pos){
+    if (!running || !jacked || wheels[pos].complete) return;
+    selectedWheel = pos;
+    resetWheelsUI();
+    wheelButtons.find(btn => btn.dataset.pos === pos)?.classList.add('active');
+
+    const wheel = wheels[pos];
+    const label = wheelMap[pos].label;
+    serviceTitle.textContent = `${label} Service`;
+    phasePill.textContent = pos;
+
+    if (wheel.phase === 'idle') wheel.phase = 'remove';
+
+    if (wheel.phase === 'remove'){
+      serviceSub.textContent = 'Zap off all five lugs.';
+      phaseBtn.textContent = 'REMOVE OLD TIRE';
+      phaseBtn.disabled = wheel.removed.size !== 5;
+      serviceHint.textContent = 'Tap each lug to remove it. Every click simulates the impact gun.';
+    } else if (wheel.phase === 'mounted'){
+      serviceSub.textContent = 'Fresh tire is mounted. Tighten in the star pattern.';
+      phaseBtn.textContent = 'WHEEL COMPLETE';
+      phaseBtn.disabled = wheel.tightenIndex !== 5;
+      serviceHint.textContent = 'Click the highlighted lug in the correct order. Wrong clicks add +0.25 sec.';
+    } else if (wheel.phase === 'tighten'){
+      serviceSub.textContent = 'Retighten the lugs in star pattern.';
+      phaseBtn.textContent = 'WHEEL COMPLETE';
+      phaseBtn.disabled = wheel.tightenIndex !== 5;
+      serviceHint.textContent = 'Hit the highlighted lug next. Keep it clean for the fastest time.';
+    } else if (wheel.phase === 'pulled'){
+      serviceSub.textContent = 'Old tire is off. Slam the fresh tire on.';
+      phaseBtn.textContent = 'MOUNT FRESH TIRE';
+      phaseBtn.disabled = false;
+      serviceHint.textContent = 'One tap mounts the new tire so you can go straight into tightening.';
+    }
+
+    renderLugs();
+    callout.textContent = `Working the ${label}. Move quick and keep it clean.`;
+  }
+
+  function renderLugs(){
+    const wheel = selectedWheel ? wheels[selectedWheel] : null;
+    lugButtons.forEach(btn => {
+      btn.classList.remove('hot');
+      btn.disabled = true;
+      btn.style.opacity = '1';
+      if (!wheel){
+        btn.style.opacity = '.4';
+        return;
+      }
+
+      if (wheel.phase === 'remove'){
+        const removed = wheel.removed.has(btn.dataset.lug);
+        btn.disabled = removed;
+        btn.style.opacity = removed ? '.28' : '1';
+      } else if (wheel.phase === 'tighten' || wheel.phase === 'mounted'){
+        const target = order[wheel.tightenIndex];
+        const alreadyDone = order.indexOf(btn.dataset.lug) < wheel.tightenIndex;
+        btn.disabled = alreadyDone;
+        btn.style.opacity = alreadyDone ? '.28' : '1';
+        if (!alreadyDone && btn.dataset.lug === target) btn.classList.add('hot');
+      } else {
+        btn.disabled = true;
+        btn.style.opacity = '.4';
+      }
+    });
+  }
+
+  function setPenalty(delta){
+    penalty += delta;
+    penaltyEl.classList.remove('penalty-flash');
+    void penaltyEl.offsetWidth;
+    penaltyEl.classList.add('penalty-flash');
+    updateHUD();
+  }
+
+  function jackCar(){
+    if (!running || jacked) return;
+    jacked = true;
+    jackBtn.disabled = true;
+    sceneTag.textContent = 'CAR JACKED UP';
+    phasePill.textContent = 'SERVICE';
+    serviceTitle.textContent = 'Pick a Wheel';
+    serviceSub.textContent = 'All four stations are open. Select any wheel around the car.';
+    phaseBtn.textContent = 'SELECT A WHEEL TO BEGIN';
+    phaseBtn.disabled = true;
+    callout.textContent = 'Car is up. Pick a wheel and start ripping lugs off.';
+    successSound();
+    resetWheelsUI();
+    updateHUD();
+  }
+
+  function finishWheel(){
+    const wheel = wheels[selectedWheel];
+    wheel.complete = true;
+    wheel.phase = 'complete';
+    const label = wheelMap[selectedWheel].label;
+    successSound();
+    callout.textContent = `${label} is done. ${Object.values(wheels).filter(w=>w.complete).length === 4 ? 'All four are complete — drop the jack!' : 'Pick the next wheel.'}`;
+    selectedWheel = null;
+    serviceTitle.textContent = 'Pit Sequence';
+    serviceSub.textContent = 'Select the next wheel around the car.';
+    phasePill.textContent = 'SERVICE';
+    phaseBtn.textContent = 'SELECT A WHEEL TO BEGIN';
+    phaseBtn.disabled = true;
+    renderLugs();
+    resetWheelsUI();
+    updateHUD();
+  }
+
+  function handlePhaseButton(){
+    if (!selectedWheel) return;
+    const wheel = wheels[selectedWheel];
+
+    if (wheel.phase === 'remove' && wheel.removed.size === 5){
+      wheel.phase = 'pulled';
+      impactSound();
+      serviceSub.textContent = 'Old tire is off. Slam the fresh tire on.';
+      phaseBtn.textContent = 'MOUNT FRESH TIRE';
+      phaseBtn.disabled = false;
+      serviceHint.textContent = 'Mount the fresh tire, then retighten in the star pattern.';
+      callout.textContent = `${wheelMap[selectedWheel].label}: old tire off. Mounting a fresh one now.`;
+      renderLugs();
+      return;
+    }
+
+    if (wheel.phase === 'pulled'){
+      wheel.phase = 'tighten';
+      wheel.tightenIndex = 0;
+      impactSound();
+      serviceSub.textContent = 'Fresh tire mounted. Tighten in star pattern.';
+      phaseBtn.textContent = 'WHEEL COMPLETE';
+      phaseBtn.disabled = true;
+      serviceHint.textContent = 'The highlighted lug is the correct next click.';
+      callout.textContent = `${wheelMap[selectedWheel].label}: fresh tire on. Tighten it down.`;
+      renderLugs();
+      return;
+    }
+
+    if ((wheel.phase === 'tighten' || wheel.phase === 'mounted') && wheel.tightenIndex === 5){
+      finishWheel();
+    }
+  }
+
+  function clickLug(lugId){
+    if (!selectedWheel || !running) return;
+    const wheel = wheels[selectedWheel];
+
+    if (wheel.phase === 'remove'){
+      if (wheel.removed.has(lugId)) return;
+      wheel.removed.add(lugId);
+      impactSound();
+      const left = 5 - wheel.removed.size;
+      callout.textContent = left ? `${left} lug${left===1?'':'s'} left on ${wheelMap[selectedWheel].label}.` : 'All lugs are off — pull the tire!';
+      phaseBtn.disabled = wheel.removed.size !== 5;
+      if (wheel.removed.size === 5){
+        phaseBtn.textContent = 'REMOVE OLD TIRE';
+        serviceSub.textContent = 'All lugs are off. Pull the old tire.';
+      }
+      renderLugs();
+      return;
+    }
+
+    if (wheel.phase === 'tighten' || wheel.phase === 'mounted'){
+      const expected = order[wheel.tightenIndex];
+      if (lugId === expected){
+        impactSound();
+        wheel.tightenIndex += 1;
+        callout.textContent = wheel.tightenIndex < 5
+          ? `${wheelMap[selectedWheel].label}: good hit. Next lug in the star pattern.`
+          : `${wheelMap[selectedWheel].label}: lugs tight. Mark the wheel complete.`;
+        phaseBtn.disabled = wheel.tightenIndex !== 5;
+        renderLugs();
+      } else {
+        badSound();
+        wheel.mistakes += 1;
+        setPenalty(.25);
+        callout.textContent = `Wrong lug! +0.25 sec. Next correct lug is ${expected}.`;
+      }
+    }
+  }
+
+  function ratingFor(time){
+    if (time <= 18.5) return ['Legendary Pit Crew', 'Absolutely flying. That was a blistering stop fit for the top line.'];
+    if (time <= 24.5) return ['Fast Stop', 'Quick, clean, and efficient. Strong work in the box.'];
+    if (time <= 32) return ['Solid Stop', 'Good service. A few tenths are still on the table.'];
+    return ['Sloppy Stop', 'You got it done, but the crew chief wants more urgency.'];
+  }
+
+  function openResult(){
+    const raw = elapsed();
+    const final = raw + penalty;
+    lastFinalTime = final;
+    endTime = performance.now();
+    rawTime.textContent = raw.toFixed(2) + 's';
+    penaltyTime.textContent = penalty.toFixed(2) + 's';
+    finalTime.textContent = final.toFixed(2) + 's';
+
+    const [label, desc] = ratingFor(final);
+    resultTitle.textContent = label;
+    resultBlurb.textContent = 'Save your initials to the shared board and challenge your friends.';
+    ratingText.textContent = label;
+    ratingDesc.textContent = desc;
+    recordFlash.classList.remove('show');
+    saveMsg.textContent = 'Enter 3 initials and save your score.';
+    initialsInput.value = 'AAA';
+    saveScoreBtn.disabled = false;
+    resultOverlay.classList.add('show');
+    winFanfare();
+  }
+
+  function releaseCar(){
+    if (!running || Object.values(wheels).filter(w => w.complete).length !== 4) return;
+    running = false;
+    if (animationId) cancelAnimationFrame(animationId);
+    endTime = performance.now();
+    sceneTag.textContent = 'CAR RELEASED';
+    carWrap.classList.add('release');
+    callout.textContent = 'Go go go! Timer stopped. Lock in your initials.';
+    startBtn.disabled = false;
+    statusShort.textContent = 'FINISHED';
+    setTimeout(openResult, 450);
+  }
+
+  async function saveScore(){
+    const name = initialsInput.value.trim().toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+    initialsInput.value = name;
+    if (!/^[A-Z]{3}$/.test(name)){
+      saveMsg.textContent = 'Use exactly 3 letters.';
+      return;
+    }
+    if (scoreSaved){
+      saveMsg.textContent = 'That score is already saved.';
+      return;
+    }
+    saveScoreBtn.disabled = true;
+    saveMsg.textContent = 'Saving to the shared leaderboard…';
+
+    try{
+      const res = await fetch('/api/leaderboard', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name, time:lastFinalTime})
+      });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) throw new Error(data.error || 'Save failed.');
+      scoreSaved = true;
+      if (Array.isArray(data.scores)) leaderboard = data.scores;
+      renderBoard();
+      boardStatus.textContent = 'Shared online leaderboard is live';
+      saveMsg.textContent = data.rank ? `Saved! You are #${data.rank} on the shared leaderboard.` : 'Saved!';
+      if (data.rank === 1) recordFlash.classList.add('show');
+      successSound();
+    }catch(err){
+      saveMsg.textContent = err.message || 'Could not save score.';
+      saveScoreBtn.disabled = false;
+    }
+  }
+
+  function fullReset(){
+    running = false;
+    countdownRunning = false;
+    if (animationId) cancelAnimationFrame(animationId);
+    clearLights();
+    clockEl.textContent = '0.00s';
+    penalty = 0;
+    jacked = false;
+    selectedWheel = null;
+    scoreSaved = false;
+    startTime = 0;
+    endTime = 0;
+    carWrap.classList.remove('release');
+    sceneTag.textContent = 'PIT BOX READY';
+    goBanner.classList.remove('show');
+    countdownOverlay.classList.remove('show');
+    seedWheelState();
+    callout.textContent = 'Ready to roll. Hit START RACE, watch the lights, and rip through the stop.';
+    serviceTitle.textContent = 'Pit Sequence';
+    serviceSub.textContent = 'Start the run, wait for green, jack the car, and select a wheel.';
+    serviceHint.textContent = 'The highlighted lug is the correct next click during tightening. Wrong clicks add +0.25 sec.';
+    phasePill.textContent = 'READY';
+    phaseBtn.textContent = 'SELECT A WHEEL TO BEGIN';
+    phaseBtn.disabled = true;
+    jackBtn.disabled = true;
+    releaseBtn.disabled = true;
+    startBtn.disabled = false;
+    statusShort.textContent = 'READY';
+    renderLugs();
+    resetWheelsUI();
+    updateHUD();
+  }
+
+  async function startCountdown(){
+    if (countdownRunning || running) return;
+    fullReset();
+    ensureAudio();
+    countdownRunning = true;
+    startBtn.disabled = true;
+    jackBtn.disabled = true;
+    countdownOverlay.classList.add('show');
+    phasePill.textContent = 'COUNTDOWN';
+    statusShort.textContent = 'COUNTDOWN';
+    callout.textContent = 'Watch the lights…';
+
+    const steps = [
+      {num:'3', light:0, color:'red', tag:'ROLLING IN'},
+      {num:'2', light:1, color:'red', tag:'SETTING BOX'},
+      {num:'1', light:2, color:'yellow', tag:'READY CREW'},
+      {num:'GO!', light:4, color:'green', tag:'GREEN FLAG'}
+    ];
+
+    clearLights();
+
+    for (let i=0; i<steps.length; i++){
+      const step = steps[i];
+      countdownNum.textContent = step.num;
+      sceneTag.textContent = step.tag;
+      if (i < 3){
+        lights[i].classList.add('on');
+        beep(550 - i*60, .09, 'square', .05);
+      } else {
+        lights[3].classList.add('on');
+        lights[4].classList.add('on');
+        startTone();
+      }
+      await new Promise(r => setTimeout(r, i < 3 ? 820 : 620));
+    }
+
+    countdownOverlay.classList.remove('show');
+    goBanner.classList.add('show');
+    setTimeout(()=>goBanner.classList.remove('show'), 1200);
+
+    countdownRunning = false;
+    running = true;
+    startTime = performance.now();
+    sceneTag.textContent = 'GO GO GO';
+    callout.textContent = 'Green flag! Jack the car and get after it.';
+    phasePill.textContent = 'JACK';
+    jackBtn.disabled = false;
+    statusShort.textContent = 'JACK';
+    updateHUD();
+    tick();
+  }
+
+  // Event wiring
+  startBtn.addEventListener('click', startCountdown);
+  jackBtn.addEventListener('click', jackCar);
+  releaseBtn.addEventListener('click', releaseCar);
+  phaseBtn.addEventListener('click', handlePhaseButton);
+  backBtn.addEventListener('click', () => {
+    selectedWheel = null;
+    serviceTitle.textContent = 'Pit Sequence';
+    serviceSub.textContent = jacked ? 'Select any remaining wheel around the car.' : 'Start the run, wait for green, jack the car, and select a wheel.';
+    phasePill.textContent = jacked ? 'SERVICE' : 'READY';
+    phaseBtn.textContent = 'SELECT A WHEEL TO BEGIN';
+    phaseBtn.disabled = true;
+    renderLugs();
+    resetWheelsUI();
+    callout.textContent = jacked ? 'Pick the next wheel.' : 'Ready to roll. Hit START RACE, watch the lights, and rip through the stop.';
+  });
+
+  wheelButtons.forEach(btn => btn.addEventListener('click', () => selectWheel(btn.dataset.pos)));
+  lugButtons.forEach(btn => btn.addEventListener('click', () => clickLug(btn.dataset.lug)));
+
+  initialsInput.addEventListener('input', () => {
+    initialsInput.value = initialsInput.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+  });
+  saveScoreBtn.addEventListener('click', saveScore);
+  playAgainBtn.addEventListener('click', () => {
+    resultOverlay.classList.remove('show');
+    fullReset();
+  });
+
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.textContent = soundOn ? '🔊 SOUND ON' : '🔈 SOUND OFF';
+    if (soundOn) ensureAudio();
+  });
+
+  renderBoard();
+  loadBoard();
+  setInterval(loadBoard, 15000);
+  fullReset();
 })();
 </script>
 </body>
